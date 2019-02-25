@@ -9,7 +9,7 @@ jobs:
   steps:
   - template: ../steps/init-docker-linux.yml
   - script: >
-      $(Build.Repository.LocalPath)/scripts/invoke-imagebuilder.sh -DockerRunOptions $(dockerArmRunOptions) -ImageBuilderArgs
+      $(Build.Repository.LocalPath)/scripts/invoke-imagebuilder.sh -DockerRunOptions $(dockerArmRunOptions) -ImageBuilderArgs \
         generateBuildMatrix --manifest $(manifest) --type build --os-type '*' --architecture '*' $(imageBuilder.generateMatrixQueueArgs)
     name: buildMatrix
   - powershell: >
