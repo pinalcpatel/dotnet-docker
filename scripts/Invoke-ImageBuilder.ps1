@@ -52,21 +52,21 @@ function Exec {
     }
 }
 
-$windowsImageBuilder = 'mcr.microsoft.com/dotnet-buildtools/image-builder:nanoserver-20190301113613'
-$linuxImageBuilder = 'mcr.microsoft.com/dotnet-buildtools/image-builder:debian-20190301193659'
-
 $imageBuilderContainerName = "ImageBuilder-$(Get-Date -Format yyyyMMddhhmmss)"
 $containerCreated = $false
 
 pushd $PSScriptRoot/../
 try {
+
+    $imageNames = ./Get-ImageNames.ps1
+
     $activeOS = docker version -f "{{ .Server.Os }}"
     if ($activeOS -eq "linux") {
         # On Linux, ImageBuilder is run within a container.
         $imageBuilderImageName = "microsoft-dotnet-imagebuilder-withrepo"
         if ($ReuseImageBuilderImage -ne $True) {
-            ./scripts/Invoke-WithRetry "docker pull $linuxImageBuilder"
-            Exec "docker build -t $imageBuilderImageName --build-arg IMAGE=$linuxImageBuilder -f ./scripts/Dockerfile.WithRepo ."
+            ./scripts/Invoke-WithRetry "docker pull $($imageNames.ImageBuilderLinux)"
+            Exec "docker build -t $imageBuilderImageName --build-arg IMAGE=$($imageNames.ImageBuilderLinux) -f ./scripts/Dockerfile.WithRepo ."
         }
         
         $imageBuilderCmd = "docker run --name $imageBuilderContainerName -v /var/run/docker.sock:/var/run/docker.sock $imageBuilderImageName"
@@ -77,9 +77,10 @@ try {
         $imageBuilderFolder = ".Microsoft.DotNet.ImageBuilder"
         $imageBuilderCmd = [System.IO.Path]::Combine($imageBuilderFolder, "Microsoft.DotNet.ImageBuilder.exe")
         if (-not (Test-Path -Path "$imageBuilderCmd" -PathType Leaf)) {
-            ./scripts/Invoke-WithRetry "docker pull $windowsImageBuilder"
-            Exec "docker create --name $imageBuilderContainerName $windowsImageBuilder"
+            ./scripts/Invoke-WithRetry "docker pull $($imageNames.ImageBuilderWindows)"
+            Exec "docker create --name $imageBuilderContainerName $($imageNames.ImageBuilderWindows)"
             $containerCreated = $true
+            
             if (Test-Path -Path $imageBuilderFolder)
             {
                 Remove-Item -Recurse -Force -Path $imageBuilderFolder
