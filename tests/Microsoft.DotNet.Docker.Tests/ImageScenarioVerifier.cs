@@ -69,6 +69,9 @@ namespace Microsoft.DotNet.Docker.Tests
             }
         }
 
+        public static string GetDotnetNewCmd(string appType, string netCoreAppVersion) =>
+            $"dotnet new {appType} --framework netcoreapp{netCoreAppVersion}";
+
         private static void ApplyProjectCustomizations(ImageData _imageData, string projectFilePath)
         {
             if (_imageData.Version == V1_1)
@@ -117,13 +120,12 @@ namespace Microsoft.DotNet.Docker.Tests
         {
             string appDir = Path.Combine(Directory.GetCurrentDirectory(), $"{appType}App{DateTime.Now.ToFileTime()}");
             string containerName = _imageData.GetIdentifier($"create-{appType}");
-
             try
             {
                 _dockerHelper.Run(
                     image: _imageData.GetImage(DotNetImageType.SDK, _dockerHelper),
                     name: containerName,
-                    command: $"dotnet new {appType} --framework netcoreapp{_imageData.Version}",
+                    command: GetDotnetNewCmd(appType, _imageData.VersionString),
                     workdir: "/app",
                     skipAutoCleanup: true);
 
