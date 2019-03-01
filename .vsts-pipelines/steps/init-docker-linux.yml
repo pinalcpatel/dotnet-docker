@@ -21,6 +21,10 @@ steps:
       -e DOCKER_TLS_VERIFY=1
       -e DOCKER_HOST=tcp://$(DOCKER_HOST_IP):2376"
     displayName: Define dockerArmRunOptions Variable
+- ${{ if eq(parameters.setupRemoteDockerServer, 'false') }}:
+  - script: >
+      echo "##vso[task.setvariable variable=dockerArmRunOptions]"
+    displayName: Define dockerArmRunOptions Variable
 
   ################################################################################
   # Setup Test Runner (Optional)
