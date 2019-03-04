@@ -30,6 +30,7 @@ param(
     $ImageBuilderArgs,
 
     [string]
+    [AllowEmptyString()]
     $DockerRunOptions,
 
     [switch]
@@ -78,13 +79,13 @@ try {
             Exec "docker build -t $imageBuilderImageName --build-arg IMAGE=$($imageNames.ImageBuilderLinux) -f ./scripts/Dockerfile.WithRepo ."
         }
 
-        $dockerRunOptions = "$DockerRunOptions --name $imageBuilderContainerName -v /var/run/docker.sock:/var/run/docker.sock"
+        $DockerRunOptions = "$DockerRunOptions --name $imageBuilderContainerName -v /var/run/docker.sock:/var/run/docker.sock"
 
         if (-not $deferContainerRemoval) {
-            $dockerRunOptions += " --rm"
+            $DockerRunOptions += " --rm"
         }
 
-        $imageBuilderCmd = "docker run $dockerRunOptions $imageBuilderImageName"
+        $imageBuilderCmd = "docker run $DockerRunOptions $imageBuilderImageName"
         $containerCreated = $true
     }
     else {
